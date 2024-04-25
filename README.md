@@ -23,4 +23,4 @@ couple of small mistakes during making the introscene
 reffered back to previous game code to compare
 fixed the current problem
 Working through the gameplay was easy to insert the images, sound, and timer
-Had to look at notes and a few videos to see ways to make the player jump
+Scrapped the jump function too many errors not enough time (my fault for that part)
