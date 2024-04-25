@@ -10,7 +10,7 @@ Games ends and starts correctly
 Labels work as designed
 
 Technologies Needed:
-Pygame, random is all the imports I'm using for this
+Pygame, random imports
 
 Resources: 
 Background img - istockphotos.com
@@ -19,3 +19,8 @@ audio - jsfxr
 The rest is original art from me 
 
 During the process:
+couple of small mistakes during making the introscene 
+reffered back to previous game code to compare
+fixed the current problem
+Working through the gameplay was easy to insert the images, sound, and timer
+Had to look at notes and a few videos to see ways to make the player jump
