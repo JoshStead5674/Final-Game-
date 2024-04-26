@@ -1,1 +1,231 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Apr 18 13:38:59 2024
+
+@author: jstea
+"""
+
+import pygame
+import random 
+
+class IntroScene:
+    def __init__(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode((800, 600))
+        pygame.display.set_caption("Donster Man vs. Big Wack")
+        self.clock = pygame.time.Clock()
+        
+        self.background = pygame.image.load("DarkAlley.jpg")
+        self.background = pygame.transform.scale(self.background, (800, 600))
+        
+        self.playButton = pygame.image.load("playButton.jpg")
+        self.playButton = pygame.transform.scale(self.playButton, (180, 100))
+        self.playButton_rect = self.playButton.get_rect(center = (150, 500))
+       
+        self.quitButton = pygame.image.load("quitButton.jpg")
+        self.quitButton = pygame.transform.scale(self.quitButton, (180, 100))
+        self.quitButton_rect = self.quitButton.get_rect(center = (650, 500))
+        
+        self.labelFont = pygame.font.Font(None, 30)
+        self.labelText = [
+            "Instructions: use the left and right arrow key to move", 
+        "Click the left Mouse button to shoot", 
+        "You get three hits before you lose. Good Luck."
+        ]
+        self.labelPrint = []
+        for i, text in enumerate(self.labelText):
+            labelDisplay = self.labelFont.render(text, True, (255,0,255))
+            labelRect = labelDisplay.get_rect(midtop = (400, 100 + i * 30))
+            self.labelPrint.append((labelDisplay, labelRect))
+            
+            
+    def run (self):
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.playButton_rect.collidepoint(event.pos):
+                        gameScene = GamePlay()
+                        gameScene.run()
+                    elif self.quitButton_rect.collidepoint(event.pos):
+                        pygame.quit()                    
+                    
+            self.screen.blit(self.background, (0, 0))
+            self.screen.blit(self.playButton, self.playButton_rect)
+            self.screen.blit(self.quitButton, self.quitButton_rect)
+            
+            for labelDisplay, labelRect in self.labelPrint:
+                self.screen.blit(labelDisplay, labelRect)
+           
+            pygame.display.update()
+            self.clock.tick(60)
+            
+"""           """
+
+class GameOver:
+    def __init__(self, winner):
+        pygame.init()
+        self.screen = pygame.display.set_mode((800, 600))
+        pygame.display.set_caption("Game Over")
+        self.clock = pygame.time.Clock()
+        
+        self.background = pygame.image.load("DarkAlley.jpg")
+        self.background = pygame.transform.scale(self.background, (800, 600))
+        
+        self.retryButton = pygame.image.load("Retry.png")
+        self.retryButton = pygame.transform.scale(self.retryButton, (180, 100))
+        self.retryButton_rect = self.retryButton.get_rect(center = (150, 500))
+       
+        self.quitButton = pygame.image.load("quitButton.jpg")
+        self.quitButton = pygame.transform.scale(self.quitButton, (180, 100))
+        self.quitButton_rect = self.quitButton.get_rect(center = (650, 500))
+        
+        self.winnerText = {"player": "Donster Man", "enemy": "Big Wack"}[winner]
+        self.labelFont = pygame.font.Font(None, 55)
+        self.labelText = (f"{self.winnerText} wins!!!")
+        self.labelDisplay = self.labelFont.render(self.labelText, True, (255, 0, 255))
+        self.labelRect = self.labelDisplay.get_rect( center = (400, 200))
+            
+    def run(self):
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.retryButton_rect.collidepoint(event.pos):
+                        gameScene = GamePlay()
+                        gameScene.run()
+                    elif self.quitButton_rect.collidepoint(event.pos):
+                        pygame.quit()                    
+                    
+            self.screen.blit(self.background, (0, 0))
+            self.screen.blit(self.retryButton, self.retryButton_rect)
+            self.screen.blit(self.quitButton, self.quitButton_rect)
+            self.screen.blit(self.labelDisplay, self.labelRect)
+        
+            pygame.display.update()
+            self.clock.tick(60)
+        
+"""      """  
+        
+class GamePlay:
+    def __init__(self):
+        pygame.init()
+        pygame.mixer.init()
+        
+        self.screen = pygame.display.set_mode((800, 600))
+        pygame.display.set_caption("Back alley Brawl!") 
+         
+        self.background = pygame.image.load("DarkAlley.jpg")
+        self.background = pygame.transform.scale(self.background, (800, 600))
+        
+        self.Player = pygame.image.load("Donster Man.jpg")
+        self.Player = pygame.transform.scale(self.Player, (100, 140))
+        self.PlayerRect = self.Player.get_rect( center = (100,500))
+        self.startingPosition = self.PlayerRect.copy()
+        self.Enemy = pygame.image.load("Big Wack.jpg")
+        self.Enemy = pygame.transform.scale(self.Enemy, (210, 230))
+        self.EnemyRect = self.Enemy.get_rect( center = (700, 500))
+        
+        self.PlayerLives = 3
+        self.EnemyLives = 100
+       
+        self.Ketchup = pygame.image.load("Ketchup bullet.jpg")
+        self.Ketchup = pygame.transform.scale(self.Ketchup, (25, 15))
+        self.KetchupRect = self.Ketchup.get_rect()
+        self.Pickle = pygame.image.load("Pickle bullet.jpg")
+        self.Pickle = pygame.transform.scale(self.Pickle, (40, 35))
+        self.PickleRect = self.Pickle.get_rect()
+        
+        self.KetchupBullets = []
+        
+        self.PickleWidth, self.PickleHeight = self.Pickle.get_size()
+        self.PickleX = random.randint(0, 800 - self.PickleWidth)
+        self.PickleY = 0
+        self.PickleSpeed = random.randint(8, 10)
+        
+        self.KetchupSound = pygame.mixer.Sound("Ketchup.wav")
+        self.PickleSound = pygame.mixer.Sound("PICKLE.wav")
+        self.PickleSound.play()
+        
+        self.font = pygame.font.Font(None, 38)
+        self.playerHP = self.font.render("Player Lives: " + str(self.PlayerLives), True, (255,0,255))
+        self.playerHPRect = self.playerHP.get_rect(topleft = (20,20))
+        self.enemyHP = self.font.render("Enemy Lives: " + str(self.EnemyLives), True, (255,0,255))
+        self.enemyHPRect = self.enemyHP.get_rect(topright = (780,20))
+        
+        self.keepGoing = True
+        self.clock = pygame.time.Clock()
+        
+    def run(self):
+        while self.keepGoing:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.keepGoing = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1:
+                            KetchupBulletRect = self.Ketchup.get_rect( center = self.PlayerRect.center)
+                            self.KetchupBullets.append(KetchupBulletRect)
+                            self.KetchupSound.play()
+                            
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT]:
+                if self.PlayerRect.x > 0:
+                    self.PlayerRect.x -= 5
+            if keys[pygame.K_RIGHT]:
+                self.PlayerRect.x += 5
+                
+            if self.PlayerRect.colliderect(self.EnemyRect):
+                self.PlayerRect = self.startingPosition.copy()
+        
+            for bullet in self.KetchupBullets:
+                bullet.x += 8
+                if bullet.colliderect(self.EnemyRect):
+                    self.KetchupBullets.remove(bullet)
+                    self.EnemyLives -= 1
+          
+            self.PickleY += self.PickleSpeed
+            if self.PlayerRect.colliderect(pygame.Rect(self.PickleX, self.PickleY, self.PickleWidth, self.PickleHeight)):
+                self.PickleY = 0
+                self.PickleX = random.randint(0, 600 - self.PickleWidth)
+                self.PickleSpeed = random.randint(8, 10)
+                self.PickleSound.play()
+                self.PlayerLives -= 1
+            if self.PickleY > 600:
+                self.PickleY = 0
+                self.PickleX = random.randint(0, 600 - self.PickleWidth)
+                self.PickleSpeed = random.randint(8, 10)
+                self.PickleSound.play()
+                
+            self.playerHP = self.font.render("Player Lives: " + str(self.PlayerLives), True, (255,0,255))
+            self.enemyHP = self.font.render("Enemy Lives: " + str(self.EnemyLives), True, (255,0,255))
+                
+        
+            self.screen.blit(self.background, (0, 0))
+            self.screen.blit(self.Player,self.PlayerRect)
+            self.screen.blit(self.Enemy, self.EnemyRect)
+            self.screen.blit(self.playerHP, self.playerHPRect)
+            self.screen.blit(self.enemyHP, self.enemyHPRect)
+            
+            for bullet in self.KetchupBullets:
+                self.screen.blit(self.Ketchup, bullet)
+            self.screen.blit(self.Pickle, (self.PickleX, self.PickleY))
+            
+            if self.PlayerLives == 0:
+                gameOverScene = GameOver("enemy")
+                gameOverScene.run()
+                self.keepGoing = False
+            elif self.EnemyLives == 0:
+                gameOverScene = GameOver("player")
+                gameOverScene.run()
+            
+            pygame.display.update()
+            self.clock.tick(60)
+  
+    
+if __name__ == "__main__":
+    intro = IntroScene()
+    intro.run()
+
 
